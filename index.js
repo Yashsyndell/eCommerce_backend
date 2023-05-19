@@ -34,6 +34,18 @@ app.post("/get-userdetails",(req,resp)=>{
     })
 })
 
+app.get("/user_details",(req,resp)=>{
+    con.query("SELECT id,email,type,upd,del FROM userrights WHERE type='user' OR type='admin' ",(err,result)=>{
+        if(err) throw err;
+        resp.send(result);
+    });
+});
+
+
+
+
+//It will us to store image with it's data.
+
 let storage = multer.diskStorage({
     destination:(req,file,callBack)=>{
         callBack(null,'./public/images')
@@ -46,11 +58,13 @@ let storage = multer.diskStorage({
 let upload = multer({
     storage:storage
 })
+
 app.post("/insert-imgdetails",upload.single("image"),(req,resp)=>{
     if(!req.upimg){
         console.log("No file upload");}
         else{
-            console.log("new");
+            var imgsrc = "/public/images"+req.upimg.filename;
+            console.log(imgsrc);
         }
 });
 
