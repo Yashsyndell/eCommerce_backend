@@ -50,7 +50,7 @@ app.post("/insert-imgdetails",upload.single("image"),(req,resp)=>{
     if(!req.upimg){
         console.log("No file upload");}
         else{
-            
+            console.log("new");
         }
 });
 
