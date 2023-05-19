@@ -34,6 +34,7 @@ app.post("/get-userdetails",(req,resp)=>{
     })
 })
 
+//Get user data.
 app.get("/user_details",(req,resp)=>{
     con.query("SELECT id,email,type,upd,del FROM userrights WHERE type='user' OR type='admin' ",(err,result)=>{
         if(err) throw err;
@@ -41,6 +42,37 @@ app.get("/user_details",(req,resp)=>{
     });
 });
 
+
+
+//Updateing type by master admin.
+app.put("/update-type",(req,resp)=>{
+    const {type} = req.body;
+    const {id} = req.body;
+    con.query("UPDATE userrights SET type=? WHERE id=?",[type,id],(err,reult)=>{
+        if(err) throw err;
+        resp.send(true);
+    })
+});
+
+//Updateing admin update rights by master admin.
+app.put("/update-rights",(req,resp)=>{
+    const {upd} = req.body;
+    const {id} = req.body;
+    con.query("UPDATE userrights SET upd=? WHERE id=?",[upd,id],(err,reult)=>{
+        if(err) throw err;
+        resp.send(true);
+    })
+});
+
+//Updateing admin delete rights by master admin.
+app.put("/delete-rights",(req,resp)=>{
+    const {del} = req.body;
+    const {id} = req.body;
+    con.query("UPDATE userrights SET upd=? WHERE id=?",[del,id],(err,reult)=>{
+        if(err) throw err;
+        resp.send(true);
+    })
+});
 
 
 
