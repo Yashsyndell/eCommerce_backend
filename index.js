@@ -23,7 +23,7 @@ app.post("/insert-userrights", (req, resp) => {
 app.post("/get-userdetails", (req, resp) => {
   let data = req.body;
   con.query(
-    "SELECT id,email,type FROM userrights WHERE email = ? AND pass = ?",
+    "SELECT id,email,type,upd,del FROM userrights WHERE email = ? AND pass = ?",
     [data.email, data.pass],
     (err, rlt) => {
       if (err) throw err;
@@ -118,7 +118,7 @@ app.post(
     const { prdname } = req.body;
     const { details } = req.body;
     const { price } = req.body;
-
+    const {uid} = req.body;
     let imgpath ="";
     for(let img of req.files.image)
     {
@@ -130,7 +130,8 @@ app.post(
         name:prdname,
         details:details,
         price:price,
-        imgsrc:imgpath
+        imgsrc:imgpath,
+        uid:uid
     }
 
     con.query("INSERT INTO prd SET ?",[data],(err,rsult)=>{
@@ -145,6 +146,43 @@ app.get("/get-imagedetails",(req,resp)=>{
     con.query("SELECT * FROM prd",(err,result)=>{
         if(err) throw err;
         resp.send(result);
+    });
+});
+
+//This is for update image data...
+app.put("/update-imgData",upload.fields([{
+    name:"image",
+    maxCount:1
+}]),(req,resp)=>{
+
+    const {name} = req.body;
+    const {details} = req.body;
+    const {price}  = req.body;
+    const {id} = req.body;
+    const {imgsrc} = req.body;
+
+    fs.rmSync(__dirname+imgsrc);
+
+    let imgpath = "";
+    for(let img of req.files.image){
+        imgpath = `/${img.path}`;
+        imgpath = imgpath.replace(/\\/g,'/');
+    }
+
+    con.query("UPDATE prd SET name=?,details=?,price=?,imgsrc=? WHERE id=?",[name,details,price,imgpath,id],(err,rsult)=>{
+        if (err) throw err;
+        resp.send(rsult);
+    })
+}); 
+
+//This is use for delete image and it's data..
+app.delete("/delete-imgData",(req,resp)=>{
+    const {imgsrc} = req.body;
+    const {id} = req.body;
+    fs.rmSync(__dirname+imgsrc);
+    con.query("DELETE FROM prd WHERE id = ?",[id],(err,rsult)=>{
+        if(err) throw err;
+        resp.send(true);
     });
 });
 app.listen("3000", console.log("server connected......"));
