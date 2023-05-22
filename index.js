@@ -8,7 +8,7 @@ const multer = require("multer");
 const fs = require("fs");
 app.use(cors());
 app.use(express.json());
-app.use("/public",express.static(path.join(__dirname,"public")));
+app.use("/public", express.static(path.join(__dirname, "public")));
 
 //This api is made for insert data in userrights table..........
 app.post("/insert-userrights", (req, resp) => {
@@ -118,71 +118,113 @@ app.post(
     const { prdname } = req.body;
     const { details } = req.body;
     const { price } = req.body;
-    const {uid} = req.body;
-    let imgpath ="";
-    for(let img of req.files.image)
-    {
-        imgpath = `/${img.path}`;
-        imgpath = imgpath.replace(/\\/g,'/');
+    const { uid } = req.body;
+    let imgpath = "";
+    for (let img of req.files.image) {
+      imgpath = `/${img.path}`;
+      imgpath = imgpath.replace(/\\/g, "/");
     }
 
     const data = {
-        name:prdname,
-        details:details,
-        price:price,
-        imgsrc:imgpath,
-        uid:uid
-    }
+      name: prdname,
+      details: details,
+      price: price,
+      imgsrc: imgpath,
+      uid: uid,
+    };
 
-    con.query("INSERT INTO prd SET ?",[data],(err,rsult)=>{
-        if(err) throw err;
-        resp.send(true);
+    con.query("INSERT INTO prd SET ?", [data], (err, rsult) => {
+      if (err) throw err;
+      resp.send(true);
     });
   }
 );
 
 //This is use for get image details...
-app.get("/get-imagedetails",(req,resp)=>{
-    con.query("SELECT * FROM prd",(err,result)=>{
-        if(err) throw err;
-        resp.send(result);
-    });
+app.get("/get-imagedetails", (req, resp) => {
+  con.query("SELECT * FROM prd", (err, result) => {
+    if (err) throw err;
+    resp.send(result);
+  });
 });
 
 //This is for update image data...
-app.put("/update-imgData",upload.fields([{
-    name:"image",
-    maxCount:1
-}]),(req,resp)=>{
+app.put(
+  "/update-imgData",
+  upload.fields([
+    {
+      name: "image",
+      maxCount: 1,
+    },
+  ]),
+  (req, resp) => {
+    const { name } = req.body;
+    const { details } = req.body;
+    const { price } = req.body;
+    const { id } = req.body;
+    const { imgsrc } = req.body;
 
-    const {name} = req.body;
-    const {details} = req.body;
-    const {price}  = req.body;
-    const {id} = req.body;
-    const {imgsrc} = req.body;
-
-    fs.rmSync(__dirname+imgsrc);
+    fs.rmSync(__dirname + imgsrc);
 
     let imgpath = "";
-    for(let img of req.files.image){
-        imgpath = `/${img.path}`;
-        imgpath = imgpath.replace(/\\/g,'/');
+    for (let img of req.files.image) {
+      imgpath = `/${img.path}`;
+      imgpath = imgpath.replace(/\\/g, "/");
     }
 
-    con.query("UPDATE prd SET name=?,details=?,price=?,imgsrc=? WHERE id=?",[name,details,price,imgpath,id],(err,rsult)=>{
+    con.query(
+      "UPDATE prd SET name=?,details=?,price=?,imgsrc=? WHERE id=?",
+      [name, details, price, imgpath, id],
+      (err, rsult) => {
         if (err) throw err;
         resp.send(rsult);
-    })
-}); 
+      }
+    );
+  }
+);
 
 //This is use for delete image and it's data..
-app.delete("/delete-imgData",(req,resp)=>{
-    const {imgsrc} = req.body;
-    const {id} = req.body;
-    fs.rmSync(__dirname+imgsrc);
-    con.query("DELETE FROM prd WHERE id = ?",[id],(err,rsult)=>{
-        if(err) throw err;
-        resp.send(true);
-    });
+app.delete("/delete-imgData", (req, resp) => {
+  const { imgsrc } = req.body;
+  const { id } = req.body;
+  fs.rmSync(__dirname + imgsrc);
+  con.query("DELETE FROM prd WHERE id = ?", [id], (err, rsult) => {
+    if (err) throw err;
+    resp.send(true);
+  });
 });
+
+//This is use for add product in add cart...
+app.post("/addIN-cart", (req, resp) => {
+  con.query("INSERT INTO cart SET ? ", [req.body], (err, rsult) => {
+    if (err) throw err;
+    resp.send(true);
+  });
+});
+
+//This is for get add cart product list..
+app.get("/get-cartlist", (req, resp) => {
+  con.query("SELECT * FROM cart", (err, rsult) => {
+    if (err) throw err;
+    resp.send(rsult);
+  });
+});
+
+//This is for delete product from cart..
+app.delete("/delete-prdCart", (req, resp) => {
+  const {id} = req.body;
+  con.query("DELETE FROM cart WHERE id=?", [id], (err, rsult) => {
+    if (err) throw err;
+    resp.send(true);
+  });
+});
+
+//This is will give total sum of user add cart product...
+app.post("/get-sumtotal",(req,resp)=>{
+  const {id} = req.body; 
+  con.query("SELECT SUM(price) as totalsum FROM cart WHERE uid=?",[id],(err,rsult)=>{
+    if (err) throw err;
+    resp.send(rsult);
+  })
+})
 app.listen("3000", console.log("server connected......"));
