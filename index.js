@@ -55,7 +55,7 @@ app.put("/update-type", (req, resp) => {
     "UPDATE userrights SET type=? WHERE id=?",
     [type, id],
     (err, reult) => {
-      if (err) throw err;
+      if (err) throw resp.send(false);
       resp.send(true);
     }
   );
@@ -69,7 +69,7 @@ app.put("/update-rights", (req, resp) => {
     "UPDATE userrights SET upd=? WHERE id=?",
     [upd, id],
     (err, reult) => {
-      if (err) throw err;
+      if (err) throw resp.send(false);
       resp.send(true);
     }
   );
@@ -83,7 +83,7 @@ app.put("/delete-rights", (req, resp) => {
     "UPDATE userrights SET del=? WHERE id=?",
     [del, id],
     (err, reult) => {
-      if (err) throw err;
+      if (err) throw resp.send(false);
       resp.send(true);
     }
   );
@@ -119,13 +119,14 @@ app.post(
     const { details } = req.body;
     const { price } = req.body;
     const { uid } = req.body;
+
     let imgpath = "";
     for (let img of req.files.image) {
       imgpath = `/${img.path}`;
       imgpath = imgpath.replace(/\\/g, "/");
     }
 
-    const data = {
+    let data = {
       name: prdname,
       details: details,
       price: price,
@@ -134,7 +135,7 @@ app.post(
     };
 
     con.query("INSERT INTO prd SET ?", [data], (err, rsult) => {
-      if (err) throw err;
+      if (err) throw resp.send(false);
       resp.send(true);
     });
   }
@@ -176,12 +177,27 @@ app.put(
       "UPDATE prd SET name=?,details=?,price=?,imgsrc=? WHERE id=?",
       [name, details, price, imgpath, id],
       (err, rsult) => {
-        if (err) throw err;
-        resp.send(rsult);
+        if (err) throw resp.send(false);
+        resp.send(true);
       }
     );
   }
 );
+
+app.put("/update-dataOfimg",(req,resp)=>{
+  const { name } = req.body;
+  const { details } = req.body;
+  const { price } = req.body;
+  const { id } = req.body;
+  con.query(
+    "UPDATE prd SET name=?,details=?,price=? WHERE id=?",
+    [name, details, price,id],
+    (err, rsult) => {
+      if (err) throw resp.send(false);
+      resp.send(true);
+    }
+  );
+});
 
 //This is use for delete image and it's data..
 app.delete("/delete-imgData", (req, resp) => {
